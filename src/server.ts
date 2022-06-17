@@ -2,7 +2,7 @@ import http from "http";
 import "dotenv/config";
 import { db } from "./db";
 import { getIdFromUrl } from "./utils";
-import { getAllUsers, getUserById, addUser } from "./controller";
+import { getAllUsers, getUserById, addUser, updateUser } from "./controller";
 
 const server = http.createServer((req, res) => {
   try {
@@ -13,6 +13,9 @@ const server = http.createServer((req, res) => {
       getUserById(res, db, id);
     } else if (req.url === "/api/users" && req.method === "POST") {
       addUser(req, res, db);
+    } else if (req.url?.startsWith("/api/users/") && req.method === "PUT") {
+      const id = getIdFromUrl(req.url);
+      updateUser(req, res, db, id);
     } else {
       res.writeHead(404, { "Content-type": "aplication/json" });
       res.end(JSON.stringify({ message: "Not Found" }));

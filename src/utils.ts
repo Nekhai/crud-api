@@ -66,3 +66,16 @@ export const createNewUser = async (body: string): Promise<IUser> => {
 
   return { id: uuidv4(), ...userBody };
 };
+
+export const upgradeUser = async (
+  body: string,
+  user: IUser
+): Promise<IUser> => {
+  const userBody = await JSON.parse(body);
+
+  return { ...user, ...userBody };
+};
+
+export const getUserIndex = (id: string, db: IUser[]) => {
+  return db.map((user) => user.id).indexOf(id);
+};
