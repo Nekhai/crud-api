@@ -14,9 +14,6 @@ export const checkIfValidId = (id: string) => {
   return regexExp.test(id);
 };
 
-export const findUserById = (id: string, db: IUser[]) =>
-  db.find((account) => account.id === id);
-
 export const checkIfFieldsRequired = (reqBody: IUser) => {
   const { username, age, hobbies } = reqBody;
 
@@ -61,6 +58,9 @@ export const getBody = (req: IncomingMessage): Promise<string> => {
   });
 };
 
+export const findUserById = (id: string, db: IUser[]) =>
+  db.find((account) => account.id === id);
+
 export const createNewUser = async (body: string): Promise<IUser> => {
   const userBody = await JSON.parse(body);
 
@@ -78,4 +78,9 @@ export const upgradeUser = async (
 
 export const getUserIndex = (id: string, db: IUser[]) => {
   return db.map((user) => user.id).indexOf(id);
+};
+
+export const deleteUserById = (id: string, db: IUser[]) => {
+  const index = getUserIndex(id, db);
+  return db.splice(index, 1);
 };

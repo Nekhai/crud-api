@@ -9,6 +9,7 @@ import {
   upgradeUser,
   getUserIndex,
   checkIfFieldsRequired,
+  deleteUserById,
 } from "./utils";
 
 export const getAllUsers = (res: ServerResponse, db: IUser[]) => {
@@ -103,6 +104,32 @@ export const updateUser = async (
         res.writeHead(200, { "Content-type": "aplication/json" });
         return res.end(JSON.stringify(updatedUser));
       }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteUser = async (
+  req: IncomingMessage,
+  res: ServerResponse,
+  db: IUser[],
+  id: string
+) => {
+  try {
+    const user = findUserById(id, db);
+
+    if (!checkIfValidId(id)) {
+      res.writeHead(400, { "Content-type": "aplication/json" });
+      res.end(JSON.stringify({ message: "Invalid ID" }));
+    } else if (!user) {
+      res.writeHead(404, { "Content-type": "aplication/json" });
+      res.end(JSON.stringify({ message: "User Not Found" }));
+    } else {
+      deleteUserById(id, db);
+
+      res.writeHead(204, { "Content-type": "aplication/json" });
+      res.end();
     }
   } catch (error) {
     console.log(error);
