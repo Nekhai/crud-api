@@ -12,19 +12,21 @@ import {
 
 const server = http.createServer((req, res) => {
   try {
-    if (req.url === "/api/users" && req.method === "GET") {
-      getAllUsers(res, db);
-    } else if (req.url?.startsWith("/api/users/") && req.method === "GET") {
+    if (req.url === "/api/users") {
+      if (req.method === "GET") {
+        getAllUsers(res, db);
+      } else if (req.method === "POST") {
+        addUser(req, res, db);
+      }
+    } else if (req.url?.startsWith("/api/users/")) {
       const id = getIdFromUrl(req.url);
-      getUserById(res, db, id);
-    } else if (req.url === "/api/users" && req.method === "POST") {
-      addUser(req, res, db);
-    } else if (req.url?.startsWith("/api/users/") && req.method === "PUT") {
-      const id = getIdFromUrl(req.url);
-      updateUser(req, res, db, id);
-    } else if (req.url?.startsWith("/api/users/") && req.method === "DELETE") {
-      const id = getIdFromUrl(req.url);
-      deleteUser(req, res, db, id);
+      if (req.method === "GET") {
+        getUserById(res, db, id);
+      } else if (req.method === "PUT") {
+        updateUser(req, res, db, id);
+      } else if (req.method === "DELETE") {
+        deleteUser(res, db, id);
+      }
     } else {
       res.writeHead(404, { "Content-type": "aplication/json" });
       res.end(JSON.stringify({ message: "Not Found" }));

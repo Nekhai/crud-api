@@ -1,5 +1,4 @@
 import { IncomingMessage } from "http";
-import { v4 as uuidv4 } from "uuid";
 
 import { IUser } from "./interfaces";
 
@@ -21,8 +20,6 @@ export const checkIfFieldsRequired = (reqBody: IUser) => {
 };
 
 export const checkIfRequestValid = (reqBody: IUser) => {
-  // const { username, age, hobbies } = reqBody;
-
   if (
     typeof reqBody?.username === "string" &&
     typeof reqBody?.age === "number" &&
@@ -43,44 +40,11 @@ export const getBody = (req: IncomingMessage): Promise<string> => {
       });
 
       req.on("end", () => {
-        try {
-          resolve(body);
-        } catch (error) {
-          reject(error);
-        }
-        // const userBody = JSON.parse(body);
-        // resolve(userBody);
+        resolve(body);
       });
     } catch (error) {
-      console.log("ERROR");
+      console.log("ERROR2");
       reject(error);
     }
   });
-};
-
-export const findUserById = (id: string, db: IUser[]) =>
-  db.find((account) => account.id === id);
-
-export const createNewUser = async (body: string): Promise<IUser> => {
-  const userBody = await JSON.parse(body);
-
-  return { id: uuidv4(), ...userBody };
-};
-
-export const upgradeUser = async (
-  body: string,
-  user: IUser
-): Promise<IUser> => {
-  const userBody = await JSON.parse(body);
-
-  return { ...user, ...userBody };
-};
-
-export const getUserIndex = (id: string, db: IUser[]) => {
-  return db.map((user) => user.id).indexOf(id);
-};
-
-export const deleteUserById = (id: string, db: IUser[]) => {
-  const index = getUserIndex(id, db);
-  return db.splice(index, 1);
 };

@@ -3,21 +3,23 @@ import { IUser } from "./interfaces";
 import {
   checkIfValidId,
   getBody,
-  createNewUser,
   checkIfRequestValid,
+  checkIfFieldsRequired,
+} from "./utils";
+import {
+  createNewUser,
   findUserById,
   upgradeUser,
   getUserIndex,
-  checkIfFieldsRequired,
   deleteUserById,
-} from "./utils";
+} from "./models";
 
 export const getAllUsers = (res: ServerResponse, db: IUser[]) => {
   try {
     res.writeHead(200, { "Content-type": "aplication/json" });
     res.end(JSON.stringify(db));
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
@@ -25,18 +27,12 @@ export const getUserById = (res: ServerResponse, db: IUser[], id: string) => {
   try {
     const user = findUserById(id, db);
 
-    if (!checkIfValidId(id)) {
-      res.writeHead(400, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "Invalid ID" }));
-    } else if (!user) {
-      res.writeHead(404, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "User Not Found" }));
-    } else {
-      res.writeHead(200, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify(user));
-    }
+    userIdErrorHandler(res, id, user);
+
+    res.writeHead(200, { "Content-type": "aplication/json" });
+    res.end(JSON.stringify(user));
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
@@ -47,12 +43,6 @@ export const addUser = async (
 ) => {
   try {
     const body = await getBody(req);
-
-    // if (!JSON.parse(body)) {
-    //   res.writeHead(400, { "Content-type": "aplication/json" });
-    //   res.end(JSON.stringify({ message: " Invalid Data Type" }));
-    // }
-
     const newUser = await createNewUser(body);
 
     if (!checkIfFieldsRequired(newUser)) {
@@ -68,9 +58,8 @@ export const addUser = async (
       res.end(JSON.stringify(newUser));
     }
   } catch (error) {
-    console.log(error);
-    // res.writeHead(400, { "Content-type": "aplication/json" });
-    // res.end(JSON.stringify({ message: " Invalid Data Type" }));
+    res.writeHead(400, { "Content-type": "aplication/json" });
+    res.end(JSON.stringify({ message: " Invalid Data Type" }));
   }
 };
 
@@ -83,35 +72,28 @@ export const updateUser = async (
   try {
     const user = findUserById(id, db);
 
-    if (!checkIfValidId(id)) {
+    userIdErrorHandler(res, id, user);
+
+    const body = await getBody(req);
+    const updatedUser = await upgradeUser(body, user);
+
+    if (!checkIfRequestValid(updatedUser)) {
       res.writeHead(400, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "Invalid ID" }));
-    } else if (!user) {
-      res.writeHead(404, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "User Not Found" }));
+      res.end(JSON.stringify({ message: "Invalid Data Type" }));
     } else {
-      const body = await getBody(req);
+      const index = getUserIndex(id, db);
+      db[index] = updatedUser;
 
-      const updatedUser = await upgradeUser(body, user);
-
-      if (checkIfRequestValid(updatedUser)) {
-        res.writeHead(400, { "Content-type": "aplication/json" });
-        res.end(JSON.stringify({ message: "Invalid Data Type" }));
-      } else {
-        const index = getUserIndex(id, db);
-        db[index] = updatedUser;
-
-        res.writeHead(200, { "Content-type": "aplication/json" });
-        return res.end(JSON.stringify(updatedUser));
-      }
+      res.writeHead(200, { "Content-type": "aplication/json" });
+      return res.end(JSON.stringify(updatedUser));
     }
   } catch (error) {
-    console.log(error);
+    res.writeHead(400, { "Content-type": "aplication/json" });
+    res.end(JSON.stringify({ message: " Invalid Data Type" }));
   }
 };
 
 export const deleteUser = async (
-  req: IncomingMessage,
   res: ServerResponse,
   db: IUser[],
   id: string
@@ -119,19 +101,27 @@ export const deleteUser = async (
   try {
     const user = findUserById(id, db);
 
-    if (!checkIfValidId(id)) {
-      res.writeHead(400, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "Invalid ID" }));
-    } else if (!user) {
-      res.writeHead(404, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "User Not Found" }));
-    } else {
-      deleteUserById(id, db);
+    userIdErrorHandler(res, id, user);
 
-      res.writeHead(204, { "Content-type": "aplication/json" });
-      res.end();
-    }
+    deleteUserById(id, db);
+
+    res.writeHead(204, { "Content-type": "aplication/json" });
+    res.end();
   } catch (error) {
-    console.log(error);
+    throw error;
+  }
+};
+
+const userIdErrorHandler = (
+  res: ServerResponse,
+  id: string,
+  user: IUser | undefined
+) => {
+  if (!checkIfValidId(id)) {
+    res.writeHead(400, { "Content-type": "aplication/json" });
+    return res.end(JSON.stringify({ message: "Invalid ID" }));
+  } else if (!user) {
+    res.writeHead(404, { "Content-type": "aplication/json" });
+    return res.end(JSON.stringify({ message: "User Not Found" }));
   }
 };
