@@ -1,8 +1,8 @@
 import { IncomingMessage, ServerResponse } from "http";
+
 import { IUser } from "./interfaces";
 import {
   checkIfValidId,
-  getBody,
   checkIfRequestValid,
   checkIfFieldsRequired,
 } from "./utils";
@@ -50,7 +50,7 @@ export const addUser = async (
       res.end(JSON.stringify({ message: "Not Contain Required Fields" }));
     } else if (!checkIfRequestValid(newUser)) {
       res.writeHead(400, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: " Invalid Data Type" }));
+      res.end(JSON.stringify({ message: "Invalid Data Type" }));
     } else {
       db.push(newUser);
 
@@ -59,7 +59,7 @@ export const addUser = async (
     }
   } catch (error) {
     res.writeHead(400, { "Content-type": "aplication/json" });
-    res.end(JSON.stringify({ message: " Invalid Data Type" }));
+    res.end(JSON.stringify({ message: "Invalid request" }));
   }
 };
 
@@ -89,7 +89,7 @@ export const updateUser = async (
     }
   } catch (error) {
     res.writeHead(400, { "Content-type": "aplication/json" });
-    res.end(JSON.stringify({ message: " Invalid Data Type" }));
+    res.end(JSON.stringify({ message: "Invalid request" }));
   }
 };
 
@@ -124,4 +124,27 @@ const userIdErrorHandler = (
     res.writeHead(404, { "Content-type": "aplication/json" });
     return res.end(JSON.stringify({ message: "User Not Found" }));
   }
+};
+
+export const badUrlRes = (res: ServerResponse) => {
+  res.writeHead(404, { "Content-type": "aplication/json" });
+  res.end(JSON.stringify({ message: "Not Found" }));
+};
+
+const getBody = (req: IncomingMessage): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    try {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk.toString();
+      });
+
+      req.on("end", () => {
+        resolve(body);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 };

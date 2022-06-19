@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+
 import { IUser } from "./interfaces";
 
 export const findUserById = (id: string, db: IUser[]) => {
@@ -8,7 +9,6 @@ export const findUserById = (id: string, db: IUser[]) => {
 export const createNewUser = async (body: string): Promise<IUser> => {
   try {
     const userBody = await JSON.parse(body);
-
     return { id: uuidv4(), ...userBody };
   } catch (error) {
     throw error;

@@ -1,4 +1,5 @@
 import http from "http";
+
 import "dotenv/config";
 import { db } from "./db";
 import { getIdFromUrl } from "./utils";
@@ -8,15 +9,18 @@ import {
   addUser,
   updateUser,
   deleteUser,
+  badUrlRes,
 } from "./controller";
 
-const server = http.createServer((req, res) => {
+export const server = http.createServer((req, res) => {
   try {
     if (req.url === "/api/users") {
       if (req.method === "GET") {
         getAllUsers(res, db);
       } else if (req.method === "POST") {
         addUser(req, res, db);
+      } else {
+        badUrlRes(res);
       }
     } else if (req.url?.startsWith("/api/users/")) {
       const id = getIdFromUrl(req.url);
@@ -26,10 +30,11 @@ const server = http.createServer((req, res) => {
         updateUser(req, res, db, id);
       } else if (req.method === "DELETE") {
         deleteUser(res, db, id);
+      } else {
+        badUrlRes(res);
       }
     } else {
-      res.writeHead(404, { "Content-type": "aplication/json" });
-      res.end(JSON.stringify({ message: "Not Found" }));
+      badUrlRes(res);
     }
   } catch (error) {
     res.writeHead(500, { "Content-type": "aplication/json" });
@@ -37,6 +42,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
