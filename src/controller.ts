@@ -1,11 +1,9 @@
 import { IncomingMessage, ServerResponse } from "http";
 
 import { IUser } from "./interfaces";
-import {
-  checkIfValidId,
-  checkIfRequestValid,
-  checkIfFieldsRequired,
-} from "./utils";
+import { checkIfRequestValid, checkIfFieldsRequired } from "./utils/utils";
+import { userIdErrorHandler } from "./utils/bedReqHandlers";
+import { getBody } from "./utils/reqBody";
 import {
   createNewUser,
   findUserById,
@@ -110,41 +108,4 @@ export const deleteUser = async (
   } catch (error) {
     throw error;
   }
-};
-
-const userIdErrorHandler = (
-  res: ServerResponse,
-  id: string,
-  user: IUser | undefined
-) => {
-  if (!checkIfValidId(id)) {
-    res.writeHead(400, { "Content-type": "aplication/json" });
-    return res.end(JSON.stringify({ message: "Invalid ID" }));
-  } else if (!user) {
-    res.writeHead(404, { "Content-type": "aplication/json" });
-    return res.end(JSON.stringify({ message: "User Not Found" }));
-  }
-};
-
-export const badUrlRes = (res: ServerResponse) => {
-  res.writeHead(404, { "Content-type": "aplication/json" });
-  res.end(JSON.stringify({ message: "Not Found" }));
-};
-
-const getBody = (req: IncomingMessage): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    try {
-      let body = "";
-
-      req.on("data", (chunk) => {
-        body += chunk.toString();
-      });
-
-      req.on("end", () => {
-        resolve(body);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
 };

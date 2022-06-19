@@ -1,16 +1,15 @@
 import http from "http";
 
-import "dotenv/config";
 import { db } from "./db";
-import { getIdFromUrl } from "./utils";
+import { getIdFromUrl } from "./utils/utils";
 import {
   getAllUsers,
   getUserById,
   addUser,
   updateUser,
   deleteUser,
-  badUrlRes,
 } from "./controller";
+import { badUrlRes } from "./utils/bedReqHandlers";
 
 export const server = http.createServer((req, res) => {
   try {
@@ -41,7 +40,3 @@ export const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ message: "Server Error" }));
   }
 });
-
-const PORT = process.env.PORT || 3001;
-
-server.listen(PORT, () => console.log(`Server started on port ${PORT}`));

@@ -1,7 +1,7 @@
 import { IncomingMessage } from "http";
 import { validate } from "uuid";
 
-import { IUser } from "./interfaces";
+import { IUser } from "../interfaces";
 
 export const getIdFromUrl = (url: string) => url.split("/")[3];
 

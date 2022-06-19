@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest --detectOpenHandles",
     "build": "tsc -p tsconfig.json",
-    "start:prod": "npm run build && node dist/server.js",
-    "start:dev": "nodemon src/server.ts",
+    "start:prod": "npm run build && node dist/index.js",
+    "start:dev": "nodemon src/index.ts",
     "start:multi": "npm run build && node dist/multi.js"
   },
   "repository": {
